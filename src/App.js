@@ -5,6 +5,12 @@ import { fetchData } from "./redux/data/dataActions";
 import * as s from "./styles/globalStyles";
 import styled from "styled-components";
 import i1 from "./assets/images/1.png";
+import i2 from "./assets/images/2.png";
+import i3 from "./assets/images/3.png";
+import appconfig from "./appconfig";
+import { Carousel } from 'react-responsive-carousel';
+import "react-responsive-carousel/lib/styles/carousel.min.css";
+
 
 export const StyledButton = styled.button`
   padding: 10px;
@@ -30,19 +36,22 @@ export const ResponsiveWrapper = styled.div`
   display: flex;
   flex: 1;
   flex-direction: column;
+  text-align: center;
+  margin:auto;
+  display:flex;
   justify-content: stretched;
   align-items: stretched;
   width: 100%;
   @media (min-width: 767px) {
-    flex-direction: row;
+    flex-direction: column;
   }
 `;
 
 export const StyledImg = styled.img`
-  width: 200px;
+  max-width: 100%;
   height: 200px;
   @media (min-width: 767px) {
-    width: 350px;
+    max-width: 350px;
     height: 350px;
   }
   transition: width 0.5s;
@@ -56,19 +65,31 @@ function App() {
   const [feedback, setFeedback] = useState("Maybe it's your lucky day.");
   const [claimingNft, setClaimingNft] = useState(false);
 
+  const images = [i1, i2, i3]
+  const [token, setToken] = useState(appconfig.tokens[0])
+  const [tokenId, setTokenId] = useState(0)
+  const handleChange = (idx) => {
+    setTokenId(idx)
+    setToken(appconfig.tokens[idx])
+    // dispatch(connect(idx))
+    getData(idx);
+  }
+
+
   const claimNFTs = (_amount) => {
     if (_amount <= 0) {
       return;
     }
-    setFeedback("Minting your Nerdy Coder Clone...");
+    console.log("claiming NFT")
+    setFeedback(`Minting your ${token.collectionName} item(s)...`);
     setClaimingNft(true);
     blockchain.smartContract.methods
       .mint(blockchain.account, _amount)
       .send({
-        gasLimit: "285000",
-        to: "0x827acb09a2dc20e39c9aad7f7190d9bc53534192",
+        gasLimit: "485000",
+        to: appconfig.ownerAddress,
         from: blockchain.account,
-        value: blockchain.web3.utils.toWei((100 * _amount).toString(), "ether"),
+        value: blockchain.web3.utils.toWei((token.mintCost * _amount).toString(), "ether"),
       })
       .once("error", (err) => {
         console.log(err);
@@ -77,21 +98,21 @@ function App() {
       })
       .then((receipt) => {
         setFeedback(
-          "WOW, you now own a Nerdy Coder Clone. go visit Opensea.io to view it."
+          `WOW, you own ${token.itemName}. go visit ${token.collectionURL} to view it.`
         );
         setClaimingNft(false);
         dispatch(fetchData(blockchain.account));
       });
   };
 
-  const getData = () => {
-    if (blockchain.account !== "" && blockchain.smartContract !== null) {
-      dispatch(fetchData(blockchain.account));
+  const getData = (idx) => {
+    if (blockchain.account !== "" && blockchain.smartContract[idx] !== null) {
+      dispatch(fetchData(blockchain.account, idx));
     }
   };
 
   useEffect(() => {
-    getData();
+    getData(tokenId);
   }, [blockchain.account]);
 
   return (
@@ -100,72 +121,72 @@ function App() {
         <s.TextTitle
           style={{ textAlign: "center", fontSize: 28, fontWeight: "bold" }}
         >
-          Mint a Nerdy Coder Clone
+          {appconfig.projectName}
         </s.TextTitle>
         <s.SpacerMedium />
-        <ResponsiveWrapper flex={1} style={{ padding: 24 }}>
-          <s.Container flex={1} jc={"center"} ai={"center"}>
-            <StyledImg alt={"example"} src={i1} />
-            <s.SpacerMedium />
-            <s.TextTitle
-              style={{ textAlign: "center", fontSize: 35, fontWeight: "bold" }}
-            >
-              {data.totalSupply}/1000
-            </s.TextTitle>
-          </s.Container>
-          <s.SpacerMedium />
+        <ResponsiveWrapper style={{ padding: 24 }}>
+        <div>
+            <s.Container flex={1} jc={"center"} ai={"center"}>
+              <div style= {{maxWidth: '350'}} >
+          <Carousel onChange={handleChange} style={{fontSize: '14'}} >
+            {appconfig.tokens.map((t, i) => {
+              return (
+                <div>
+                   <s.TextTitle
+                    style={{ textAlign: "center", fontSize: 28, fontWeight: "bold" }}
+                  >
+                    {`Mint ${t.collectionName}`}
+                  </s.TextTitle>
+                  <s.SpacerMedium />
+
+                  <div><StyledImg alt={"example"} src={images[i]} /></div>
+                  <s.SpacerMedium />
+                  <s.TextTitle
+                    style={{ textAlign: "center", fontSize: 35, fontWeight: "bold" }}
+                  >
+                    {data.totalSupply[tokenId]}/{t.totalSupply}
+                  </s.TextTitle>
+                  <s.SpacerMedium />
+                  <s.SpacerMedium />
+                </div>
+              )
+            })}
+            
+               </Carousel>
+               </div>
+                </s.Container>
+        </div>
+           
+         
+          
           <s.Container
             flex={1}
             jc={"center"}
             ai={"center"}
             style={{ backgroundColor: "#383838", padding: 24 }}
           >
-            {Number(data.totalSupply) == 1000 ? (
-              <>
-                <s.TextTitle style={{ textAlign: "center" }}>
-                  The sale has ended.
-                </s.TextTitle>
-                <s.SpacerSmall />
-                <s.TextDescription style={{ textAlign: "center" }}>
-                  You can still find Nerdy Coder Clones on{" "}
-                  <a
-                    target={"_blank"}
-                    href={"https://opensea.io/collection/nerdy-coder-clones"}
-                  >
-                    Opensea.io
-                  </a>
-                </s.TextDescription>
-              </>
-            ) : (
-              <>
-                <s.TextTitle style={{ textAlign: "center" }}>
-                  1 NCC costs 100 MATIC.
-                </s.TextTitle>
-                <s.SpacerXSmall />
-                <s.TextDescription style={{ textAlign: "center" }}>
-                  Excluding gas fee.
-                </s.TextDescription>
-                <s.SpacerSmall />
-                <s.TextDescription style={{ textAlign: "center" }}>
+            <s.TextDescription style={{ textAlign: "center" }}>
                   {feedback}
                 </s.TextDescription>
-                <s.SpacerMedium />
-                {blockchain.account === "" ||
-                blockchain.smartContract === null ? (
+                <s.SpacerSmall />
+            {blockchain.account === "" ||
+                blockchain.smartContract[tokenId] === null ? (
                   <s.Container ai={"center"} jc={"center"}>
                     <s.TextDescription style={{ textAlign: "center" }}>
-                      Connect to the Polygon network
+                      {`Connect to ${appconfig.network}`}
                     </s.TextDescription>
                     <s.SpacerSmall />
                     <StyledButton
                       onClick={(e) => {
                         e.preventDefault();
-                        dispatch(connect());
+                        dispatch(connect(tokenId));
                         getData();
                       }}
                     >
                       CONNECT
                     </StyledButton>
+                    <s.SpacerSmall />
+                
                     {blockchain.errorMsg !== "" ? (
                       <>
                         <s.SpacerSmall />
@@ -182,13 +203,42 @@ function App() {
                       onClick={(e) => {
                         e.preventDefault();
                         claimNFTs(1);
-                        getData();
+                        getData(tokenId);
                       }}
                     >
                       {claimingNft ? "BUSY" : "BUY 1"}
                     </StyledButton>
                   </s.Container>
                 )}
+                <s.SpacerSmall />
+            {Number(data.totalSupply) == token.totalSupply ? (
+              <>
+                <s.TextTitle style={{ textAlign: "center" }}>
+                  The sale has ended.
+                </s.TextTitle>
+                <s.SpacerSmall />
+                <s.TextDescription style={{ textAlign: "center" }}>
+                  {`You can still find ${appconfig.projectName} on{" "}`}
+                  <a
+                    target={"_blank"}
+                    href={"https://testnets.opensea.io/collection/369-arkives"}
+                  >
+                    Opensea.io
+                  </a>
+                </s.TextDescription>
+              </>
+            ) : (
+              <>
+                <s.TextTitle style={{ textAlign: "center" }}>
+                  {`1 ${token.tokenSymbol } costs ${token.mintCost } ${appconfig.mintCostCurrency}`}
+                </s.TextTitle>
+                <s.SpacerXSmall />
+                <s.TextDescription style={{ textAlign: "center" }}>
+                  Excluding gas fee.
+                </s.TextDescription>
+                
+                <s.SpacerMedium />
+                
               </>
             )}
           </s.Container>
@@ -196,8 +246,7 @@ function App() {
         <s.SpacerSmall />
         <s.Container jc={"center"} ai={"center"} style={{ width: "70%" }}>
           <s.TextDescription style={{ textAlign: "center", fontSize: 9 }}>
-            Please make sure you are connected to the right network (Polygon
-            Mainnet) and the correct address. Please note: Once you make the
+            Please make sure you are connected to the right network and the correct address. Please note: Once you make the
             purchase, you cannot undo this action.
           </s.TextDescription>
           <s.SpacerSmall />

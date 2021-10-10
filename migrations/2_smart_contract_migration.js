@@ -1,5 +1,9 @@
-const SmartContract = artifacts.require("NerdyCoderClones");
+const ARKS = artifacts.require("ARKS");
+const LIDX = artifacts.require("LIDX");
+const LMEMO = artifacts.require("LMEMO");
 
 module.exports = function (deployer) {
-  deployer.deploy(SmartContract, "Name", "Symbol", "https://");
+  deployer.deploy(ARKS, "The Arkonauts", "ARKS", "ipfs://Qme6M3RWu1QHbnRDo7jLdXhknPAzLzYHM9LCr3R5Vb3ioT/");
+  deployer.deploy(LIDX, "Lost Index", "LIDX", "ipfs://QmReWVt3WHCV6xvWN41Er49dTqZFxSoiFW8gaVRQv2rp67/");
+  deployer.deploy(LMEMO, "Lost Memories", "LMEMO", "ipfs://QmRFw68ir6UcQn8dJ6zjDgxqXSW2VvjnYwFYxiA3Pzc8Sr/");
 };

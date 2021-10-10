@@ -1,9 +1,10 @@
 // log
 import store from "../store";
 
-const fetchDataRequest = () => {
+const fetchDataRequest = (payload) => {
   return {
     type: "CHECK_DATA_REQUEST",
+    payload: payload
   };
 };
 
@@ -21,21 +22,22 @@ const fetchDataFailed = (payload) => {
   };
 };
 
-export const fetchData = (account) => {
+export const fetchData = (account, idx) => {
   return async (dispatch) => {
-    dispatch(fetchDataRequest());
+    dispatch(fetchDataRequest({idx:idx}));
+    
     try {
       let name = await store
         .getState()
-        .blockchain.smartContract.methods.name()
+        .blockchain.smartContract[idx].methods.name()
         .call();
       let totalSupply = await store
         .getState()
-        .blockchain.smartContract.methods.totalSupply()
+        .blockchain.smartContract[idx].methods.totalSupply()
         .call();
       let cost = await store
         .getState()
-        .blockchain.smartContract.methods.cost()
+        .blockchain.smartContract[idx].methods.cost()
         .call();
 
       dispatch(
@@ -43,8 +45,11 @@ export const fetchData = (account) => {
           name,
           totalSupply,
           cost,
+          idx
         })
       );
+      console.log(await store.getState().blockchain)
+      console.log(await store.getState().data)
     } catch (err) {
       console.log(err);
       dispatch(fetchDataFailed("Could not load data from contract."));

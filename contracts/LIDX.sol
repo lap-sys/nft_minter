@@ -1,21 +1,31 @@
 // SPDX-License-Identifier: GPL-3.0
 
-// Created by HashLips
-// The Nerdy Coder Clones
+// Amended by HashLips
+/**
+    !Disclaimer!
+    These contracts have been used to create tutorials,
+    and was created for the purpose to teach people
+    how to create smart contracts on the blockchain.
+    please review this code on your own before using any of
+    the following code for production.
+    HashLips will not be liable in any way if for the use 
+    of the code. That being said, the code has been tested 
+    to the best of the developers' knowledge to work as intended.
+*/
 
-pragma solidity ^0.8.0;
+pragma solidity >=0.7.0 <0.9.0;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract NerdyCoderClones is ERC721Enumerable, Ownable {
+contract LIDX is ERC721Enumerable, Ownable {
   using Strings for uint256;
 
   string public baseURI;
   string public baseExtension = ".json";
-  uint256 public cost = 100 ether;
-  uint256 public maxSupply = 1000;
-  uint256 public maxMintAmount = 20;
+  uint256 public cost = 0.05 ether;
+  uint256 public maxSupply = 936;
+  uint256 public maxMintAmount = 2;
   bool public paused = false;
   mapping(address => bool) public whitelisted;
 
@@ -25,7 +35,7 @@ contract NerdyCoderClones is ERC721Enumerable, Ownable {
     string memory _initBaseURI
   ) ERC721(_name, _symbol) {
     setBaseURI(_initBaseURI);
-    mint(msg.sender, 20);
+    mint(msg.sender, 2);
   }
 
   // internal
@@ -113,6 +123,7 @@ contract NerdyCoderClones is ERC721Enumerable, Ownable {
   }
 
   function withdraw() public payable onlyOwner {
-    require(payable(msg.sender).send(address(this).balance));
+    (bool success, ) = payable(msg.sender).call{value: address(this).balance}("");
+    require(success);
   }
 }

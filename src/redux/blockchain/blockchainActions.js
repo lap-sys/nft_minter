@@ -1,13 +1,17 @@
 // constants
 import Web3EthContract from "web3-eth-contract";
 import Web3 from "web3";
-import SmartContract from "../../contracts/NCC.json";
+import ARKS from "../../contracts/ARKS.json";
+import LIDX from "../../contracts/LIDX.json";
+import LMEMO from "../../contracts/LMEMO.json";
 // log
 import { fetchData } from "../data/dataActions";
-
-const connectRequest = () => {
+import appconfig from "../../appconfig";
+const abis = [ARKS.abi, LIDX.abi, LMEMO.abi]
+const connectRequest = (payload) => {
   return {
     type: "CONNECTION_REQUEST",
+    payload: payload
   };
 };
 
@@ -32,9 +36,9 @@ const updateAccountRequest = (payload) => {
   };
 };
 
-export const connect = () => {
+export const connect = (idx) => {
   return async (dispatch) => {
-    dispatch(connectRequest());
+    dispatch(connectRequest({idx: idx}));
     const { ethereum } = window;
     const metamaskIsInstalled = ethereum && ethereum.isMetaMask;
     if (metamaskIsInstalled) {
@@ -44,18 +48,23 @@ export const connect = () => {
         const accounts = await ethereum.request({
           method: "eth_requestAccounts",
         });
+        console.log('accounts')
+        console.log(accounts)
         const networkId = await ethereum.request({
           method: "net_version",
         });
+        console.log('NET ID')
+        console.log(networkId == 4)
         // const NetworkData = await SmartContract.networks[networkId];
-        if (networkId == 137) {
+        if (networkId == appconfig.networkId) {
           const SmartContractObj = new Web3EthContract(
-            SmartContract,
-            "0x827acb09a2dc20e39c9aad7f7190d9bc53534192"
+            abis[idx],
+            appconfig.tokens[idx].address
           );
           dispatch(
             connectSuccess({
               account: accounts[0],
+              idx: idx,
               smartContract: SmartContractObj,
               web3: web3,
             })
@@ -69,7 +78,7 @@ export const connect = () => {
           });
           // Add listeners end
         } else {
-          dispatch(connectFailed("Change network to Polygon."));
+          dispatch(connectFailed("Change network to Ethereum."));
         }
       } catch (err) {
         dispatch(connectFailed("Something went wrong."));

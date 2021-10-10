@@ -69,6 +69,7 @@ export const connect = (idx) => {
               web3: web3,
             })
           );
+          dispatch(fetchData(accounts[0],idx))
           // Add listeners start
           ethereum.on("accountsChanged", (accounts) => {
             dispatch(updateAccount(accounts[0]));

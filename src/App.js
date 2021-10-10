@@ -10,7 +10,7 @@ import i3 from "./assets/images/3.png";
 import appconfig from "./appconfig";
 import { Carousel } from 'react-responsive-carousel';
 import "react-responsive-carousel/lib/styles/carousel.min.css";
-
+import background from "./assets/images/fond.png";
 
 export const StyledButton = styled.button`
   padding: 10px;
@@ -19,7 +19,7 @@ export const StyledButton = styled.button`
   background-color: #ffffff;
   padding: 10px;
   font-weight: bold;
-  color: #000000;
+  color: white;
   width: 100px;
   cursor: pointer;
   box-shadow: 0px 6px 0px -2px rgba(250, 250, 250, 0.3);
@@ -73,6 +73,7 @@ function App() {
     setToken(appconfig.tokens[idx])
     // dispatch(connect(idx))
     getData(idx);
+    setFeedback("Maybe it's your lucky day.")
   }
 
 
@@ -81,9 +82,9 @@ function App() {
       return;
     }
     console.log("claiming NFT")
-    setFeedback(`Minting your ${token.collectionName} item(s)...`);
+    setFeedback(`Minting your ${token.collectionName} item...`);
     setClaimingNft(true);
-    blockchain.smartContract.methods
+    blockchain.smartContract[tokenId].methods
       .mint(blockchain.account, _amount)
       .send({
         gasLimit: "485000",
@@ -98,10 +99,10 @@ function App() {
       })
       .then((receipt) => {
         setFeedback(
-          `WOW, you own ${token.itemName}. go visit ${token.collectionURL} to view it.`
+          `WOW, you own ${token.itemName}`
         );
         setClaimingNft(false);
-        dispatch(fetchData(blockchain.account));
+        dispatch(fetchData(blockchain.account, tokenId));
       });
   };
 
@@ -116,10 +117,11 @@ function App() {
   }, [blockchain.account]);
 
   return (
+    <div style={{ backgroundImage: `url(${background})` , 'fontFamily': 'monospace'}}>
     <s.Screen style={{ backgroundColor: "var(--black)" }}>
       <s.Container flex={1} ai={"center"} style={{ padding: 24 }}>
         <s.TextTitle
-          style={{ textAlign: "center", fontSize: 28, fontWeight: "bold" }}
+          style={{ textAlign: "center", fontSize: 32, fontWeight: "bold" }}
         >
           {appconfig.projectName}
         </s.TextTitle>
@@ -177,10 +179,11 @@ function App() {
                     </s.TextDescription>
                     <s.SpacerSmall />
                     <StyledButton
+                    style={{backgroundColor: 'orange'}}
                       onClick={(e) => {
                         e.preventDefault();
                         dispatch(connect(tokenId));
-                        getData();
+                        getData(tokenId);
                       }}
                     >
                       CONNECT
@@ -193,12 +196,15 @@ function App() {
                         <s.TextDescription style={{ textAlign: "center" }}>
                           {blockchain.errorMsg}
                         </s.TextDescription>
+                        
                       </>
                     ) : null}
+                    
                   </s.Container>
                 ) : (
                   <s.Container ai={"center"} jc={"center"} fd={"row"}>
                     <StyledButton
+                      style={{backgroundColor: 'steelblue'}}
                       disabled={claimingNft ? 1 : 0}
                       onClick={(e) => {
                         e.preventDefault();
@@ -236,7 +242,8 @@ function App() {
                 <s.TextDescription style={{ textAlign: "center" }}>
                   Excluding gas fee.
                 </s.TextDescription>
-                
+                <s.SpacerSmall />
+                   <a target={"_blank"} style={{color: 'white'}}  href={`${token.collectionURL}`}>Visit Collection</a>
                 <s.SpacerMedium />
                 
               </>
@@ -246,17 +253,12 @@ function App() {
         <s.SpacerSmall />
         <s.Container jc={"center"} ai={"center"} style={{ width: "70%" }}>
           <s.TextDescription style={{ textAlign: "center", fontSize: 9 }}>
-            Please make sure you are connected to the right network and the correct address. Please note: Once you make the
-            purchase, you cannot undo this action.
-          </s.TextDescription>
-          <s.SpacerSmall />
-          <s.TextDescription style={{ textAlign: "center", fontSize: 9 }}>
-            We have set the gas limit to 285000 for the contract to successfully
-            mint your NFT. We recommend that you don't change the gas limit.
+          © 369 Project 2021
           </s.TextDescription>
         </s.Container>
       </s.Container>
     </s.Screen>
+    </div>
   );
 }
 

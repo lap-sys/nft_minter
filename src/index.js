@@ -6,7 +6,6 @@ import store from "./redux/store";
 import { Provider } from "react-redux";
 import "./styles/reset.css";
 import "./styles/theme.css";
-import "./assets/fonts/Ryomen.ttf"
 ReactDOM.render(
   <Provider store={store}>
     <App />

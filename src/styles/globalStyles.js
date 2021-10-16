@@ -1,5 +1,4 @@
 import styled from "styled-components";
-import myFont from '../assets/fonts/Ryomen.ttf';
 
 // Used for wrapping a page component
 export const Screen = styled.div`
@@ -57,15 +56,7 @@ export const TextTitle = styled.p`
   font-weight: 500;
   line-height: 1.6;
 `;
-export const StyledText = styled.p`
-  color: var(--white);
-  font-size: 32px;
-  font-weight: 500;
-  line-height: 1.6;
-  font-family: "Ryomen";
-  src: url(${myFont}) format('truetype');,
-  font-weight: normal;
-`;
+
 
 export const TextSubTitle = styled.p`
   color: var(--white);

@@ -7,7 +7,7 @@ import LMEMO from "../../contracts/LMEMO.json";
 // log
 import { fetchData } from "../data/dataActions";
 import appconfig from "../../appconfig";
-const abis = [ARKS.abi, LIDX.abi, LMEMO.abi]
+const abis = [LIDX.abi, ARKS.abi, LMEMO.abi]
 const connectRequest = (payload) => {
   return {
     type: "CONNECTION_REQUEST",
@@ -54,7 +54,6 @@ export const connect = (idx) => {
           method: "net_version",
         });
         console.log('NET ID')
-        console.log(networkId == 4)
         // const NetworkData = await SmartContract.networks[networkId];
         if (networkId == appconfig.networkId) {
           const SmartContractObj = new Web3EthContract(

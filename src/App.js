@@ -4,13 +4,15 @@ import { connect } from "./redux/blockchain/blockchainActions";
 import { fetchData } from "./redux/data/dataActions";
 import * as s from "./styles/globalStyles";
 import styled from "styled-components";
-import i1 from "./assets/images/1.png";
-import i2 from "./assets/images/2.png";
+import i1 from "./assets/images/2.png";
+import i2 from "./assets/images/1.png";
 import i3 from "./assets/images/3.png";
+import projectTitle from "./assets/images/logoweb369.png"
 import appconfig from "./appconfig";
-import { Carousel } from 'react-responsive-carousel';
-import "react-responsive-carousel/lib/styles/carousel.min.css";
+// import 'react-responsive-carousel/main.scss';
+// import 'react-responsive-carousel/examples/presentation/presentation.scss';
 import background from "./assets/images/fond.png";
+// import "./assets/fonts/Ryomen.ttf"
 
 export const StyledButton = styled.button`
   padding: 10px;
@@ -41,18 +43,30 @@ export const ResponsiveWrapper = styled.div`
   display:flex;
   justify-content: stretched;
   align-items: stretched;
-  width: 100%;
+  // width: 100%;
   @media (min-width: 767px) {
     flex-direction: column;
   }
 `;
 
+export const ResponsiveWrapper2 = styled.div`
+  display: flex;
+  flex: 1;
+  flex-direction: row;
+  text-align: center;
+  margin:auto;
+  display:flex;
+  justify-content: stretched;
+  align-items: stretched;
+  @media (min-width: 767px) {
+    flex-direction: row;
+  }
+`;
+
 export const StyledImg = styled.img`
   max-width: 100%;
-  height: 200px;
   @media (min-width: 767px) {
     max-width: 350px;
-    height: 350px;
   }
   transition: width 0.5s;
   transition: height 0.5s;
@@ -66,23 +80,21 @@ function App() {
   const [claimingNft, setClaimingNft] = useState(false);
 
   const images = [i1, i2, i3]
-  const [token, setToken] = useState(appconfig.tokens[0])
-  const [tokenId, setTokenId] = useState(0)
-  const handleChange = (idx) => {
-    setTokenId(idx)
-    setToken(appconfig.tokens[idx])
-    // dispatch(connect(idx))
-    getData(idx);
-    setFeedback("Maybe it's your lucky day.")
-  }
+  // const handleChange = (idx) => {
+  //   setTokenId(idx)
+  //   setToken(appconfig.tokens[idx])
+  //   // dispatch(connect(idx))
+  //   getData(idx);
+  //   setFeedback("Maybe it's your lucky day.")
+  // }
 
 
-  const claimNFTs = (_amount) => {
+  const claimNFTs = (tokenId, _amount) => {
     if (_amount <= 0) {
       return;
     }
     console.log("claiming NFT")
-    setFeedback(`Minting your ${token.collectionName} item...`);
+    setFeedback(`Minting your ${appconfig.tokens[tokenId].collectionName} item...`);
     setClaimingNft(true);
     blockchain.smartContract[tokenId].methods
       .mint(blockchain.account, _amount)
@@ -90,7 +102,7 @@ function App() {
         gasLimit: "485000",
         to: appconfig.ownerAddress,
         from: blockchain.account,
-        value: blockchain.web3.utils.toWei((token.mintCost * _amount).toString(), "ether"),
+        value: blockchain.web3.utils.toWei((appconfig.tokens[tokenId].mintCost * _amount).toString(), "ether"),
       })
       .once("error", (err) => {
         console.log(err);
@@ -99,7 +111,7 @@ function App() {
       })
       .then((receipt) => {
         setFeedback(
-          `WOW, you own ${token.itemName}`
+          `WOW, you own ${appconfig.tokens[tokenId].itemName}`
         );
         setClaimingNft(false);
         dispatch(fetchData(blockchain.account, tokenId));
@@ -113,66 +125,61 @@ function App() {
   };
 
   useEffect(() => {
-    getData(tokenId);
+    appconfig.tokens.map((t, i)=> {
+      getData(i)
+    })
+    ;
   }, [blockchain.account]);
 
   return (
-    <div style={{ backgroundImage: `url(${background})` , 'fontFamily': 'monospace'}}>
-    <s.Screen style={{ backgroundColor: "var(--black)" }}>
+    <div style={{'fontFamily': 'Ryomen'}}>
+    <s.Screen style={{ backgroundImage: `url(${background})`, backgroundColor: "var(--black)" }}>
       <s.Container flex={1} ai={"center"} style={{ padding: 24 }}>
-        <s.TextTitle
+      <StyledImg src={projectTitle} />
+        {/* <s.StyledText
           style={{ textAlign: "center", fontSize: 32, fontWeight: "bold" }}
         >
           {appconfig.projectName}
-        </s.TextTitle>
+        </s.StyledText> */}
         <s.SpacerMedium />
-        <ResponsiveWrapper style={{ padding: 24 }}>
+        
         <div>
-            <s.Container flex={1} jc={"center"} ai={"center"}>
-              <div style= {{maxWidth: '350'}} >
-          <Carousel onChange={handleChange} style={{fontSize: '14'}} >
+           
+             
+        <ResponsiveWrapper2 style={{ padding: 24 }}>
             {appconfig.tokens.map((t, i) => {
               return (
-                <div>
-                   <s.TextTitle
-                    style={{ textAlign: "center", fontSize: 28, fontWeight: "bold" }}
-                  >
-                    {`Mint ${t.collectionName}`}
-                  </s.TextTitle>
-                  <s.SpacerMedium />
-
-                  <div><StyledImg alt={"example"} src={images[i]} /></div>
-                  <s.SpacerMedium />
-                  <s.TextTitle
-                    style={{ textAlign: "center", fontSize: 35, fontWeight: "bold" }}
-                  >
-                    {data.totalSupply[tokenId]}/{t.totalSupply}
-                  </s.TextTitle>
-                  <s.SpacerMedium />
-                  <s.SpacerMedium />
-                </div>
-              )
-            })}
-            
-               </Carousel>
-               </div>
+                <ResponsiveWrapper style={{ padding: 24 }}>
+                <s.Container flex={1}
+            jc={"center"}
+            ai={"center"}
+            style={{ backgroundColor: "#383838", padding: 24 }}>
+                <s.TextTitle
+                        style={{ textAlign: "center", fontSize: 28, fontWeight: "bold" }}
+                      >
+                        {`${t.collectionName}`}
+                      </s.TextTitle>
+                     
                 </s.Container>
-        </div>
-           
-         
-          
-          <s.Container
+                
+                <s.Container
             flex={1}
             jc={"center"}
             ai={"center"}
             style={{ backgroundColor: "#383838", padding: 24 }}
           >
+            <StyledImg src={images[i]} />
+            <s.TextTitle
+                    style={{ textAlign: "center", fontSize: 35, fontWeight: "bold" }}
+                  >
+                    {data.totalSupply[i]}/{t.totalSupply}
+                  </s.TextTitle>
             <s.TextDescription style={{ textAlign: "center" }}>
                   {feedback}
                 </s.TextDescription>
                 <s.SpacerSmall />
             {blockchain.account === "" ||
-                blockchain.smartContract[tokenId] === null ? (
+                blockchain.smartContract[i] === null ? (
                   <s.Container ai={"center"} jc={"center"}>
                     <s.TextDescription style={{ textAlign: "center" }}>
                       {`Connect to ${appconfig.network}`}
@@ -182,8 +189,8 @@ function App() {
                     style={{backgroundColor: 'orange'}}
                       onClick={(e) => {
                         e.preventDefault();
-                        dispatch(connect(tokenId));
-                        getData(tokenId);
+                        dispatch(connect(i));
+                        getData(i);
                       }}
                     >
                       CONNECT
@@ -208,8 +215,8 @@ function App() {
                       disabled={claimingNft ? 1 : 0}
                       onClick={(e) => {
                         e.preventDefault();
-                        claimNFTs(1);
-                        getData(tokenId);
+                        claimNFTs(i, 1);
+                        getData(i);
                       }}
                     >
                       {claimingNft ? "BUSY" : "BUY 1"}
@@ -217,7 +224,7 @@ function App() {
                   </s.Container>
                 )}
                 <s.SpacerSmall />
-            {Number(data.totalSupply) == token.totalSupply ? (
+            {Number(data.totalSupply) == t.totalSupply ? (
               <>
                 <s.TextTitle style={{ textAlign: "center" }}>
                   The sale has ended.
@@ -236,20 +243,33 @@ function App() {
             ) : (
               <>
                 <s.TextTitle style={{ textAlign: "center" }}>
-                  {`1 ${token.tokenSymbol } costs ${token.mintCost } ${appconfig.mintCostCurrency}`}
+                  {`1 ${t.tokenSymbol } costs ${t.mintCost } ${appconfig.mintCostCurrency}`}
                 </s.TextTitle>
                 <s.SpacerXSmall />
                 <s.TextDescription style={{ textAlign: "center" }}>
                   Excluding gas fee.
                 </s.TextDescription>
                 <s.SpacerSmall />
-                   <a target={"_blank"} style={{color: 'white'}}  href={`${token.collectionURL}`}>Visit Collection</a>
+                   <a target={"_blank"} style={{color: 'white'}}  href={`${t.collectionURL}`}>Visit Collection</a>
                 <s.SpacerMedium />
                 
               </>
             )}
           </s.Container>
-        </ResponsiveWrapper>
+          </ResponsiveWrapper>
+                  
+              )
+            })}
+            </ResponsiveWrapper2>
+               
+              
+
+        </div>
+           
+         
+          
+          
+       
         <s.SpacerSmall />
         <s.Container jc={"center"} ai={"center"} style={{ width: "70%" }}>
           <s.TextDescription style={{ textAlign: "center", fontSize: 9 }}>
@@ -258,6 +278,9 @@ function App() {
         </s.Container>
       </s.Container>
     </s.Screen>
+    {/* <video autoplay loop poster={`url(${backgroundvid})`} id="bgvid">
+      <source src={`url(${backgroundvid})`} type="video/mp4" />
+    </video> */}
     </div>
   );
 }

@@ -4,9 +4,11 @@ import { connect } from "./redux/blockchain/blockchainActions";
 import { fetchData } from "./redux/data/dataActions";
 import * as s from "./styles/globalStyles";
 import styled from "styled-components";
-import i1 from "./assets/images/2.png";
+import ReactPlayer from 'react-player/lazy';
+import i1 from "./assets/images/1.mp4";
 import i2 from "./assets/images/1.png";
-import i3 from "./assets/images/3.png";
+import i3 from "./assets/images/3.mp4";
+import logo from './assets/images/load.gif'
 import projectTitle from "./assets/images/logoweb369.png"
 import appconfig from "./appconfig";
 // import 'react-responsive-carousel/main.scss';
@@ -43,8 +45,8 @@ export const ResponsiveWrapper = styled.div`
   display:flex;
   justify-content: stretched;
   align-items: stretched;
-  // width: 100%;
-  @media (min-width: 767px) {
+  max-width: 450px;
+  @media (min-width: 300px) {
     flex-direction: column;
   }
 `;
@@ -52,13 +54,15 @@ export const ResponsiveWrapper = styled.div`
 export const ResponsiveWrapper2 = styled.div`
   display: flex;
   flex: 1;
+  height: 100%;
   flex-direction: row;
+  flex-wrap: wrap;
   text-align: center;
   margin:auto;
   display:flex;
   justify-content: stretched;
   align-items: stretched;
-  @media (min-width: 767px) {
+  @media (min-width: 350) {
     flex-direction: row;
   }
 `;
@@ -76,9 +80,9 @@ function App() {
   const dispatch = useDispatch();
   const blockchain = useSelector((state) => state.blockchain);
   const data = useSelector((state) => state.data);
-  const [feedback, setFeedback] = useState("Maybe it's your lucky day.");
-  const [claimingNft, setClaimingNft] = useState(false);
-
+  const [feedback, setFeedback] = useState({0:"Maybe it's your lucky day.", 1:"Maybe it's your lucky day.", 2:"Maybe it's your lucky day."});
+  const [claimingNft, setClaimingNft] = useState({0:false, 1:false, 2:false});
+  const [amount, setAmount] = useState({0: 1, 1:1, 2:1})
   const images = [i1, i2, i3]
   // const handleChange = (idx) => {
   //   setTokenId(idx)
@@ -94,8 +98,8 @@ function App() {
       return;
     }
     console.log("claiming NFT")
-    setFeedback(`Minting your ${appconfig.tokens[tokenId].collectionName} item...`);
-    setClaimingNft(true);
+    setFeedback({ ...feedback, [tokenId]:`Minting ${appconfig.tokens[tokenId].collectionName} ...` });
+    setClaimingNft({ ...claimingNft, [tokenId]: true});
     blockchain.smartContract[tokenId].methods
       .mint(blockchain.account, _amount)
       .send({
@@ -106,14 +110,14 @@ function App() {
       })
       .once("error", (err) => {
         console.log(err);
-        setFeedback("Sorry, something went wrong please try again later.");
-        setClaimingNft(false);
+        setFeedback({ ...feedback, [tokenId]:"Sorry, something went wrong please try again later."});
+        setClaimingNft({ ...claimingNft, [tokenId]: false});
       })
       .then((receipt) => {
         setFeedback(
-          `WOW, you own ${appconfig.tokens[tokenId].itemName}`
+          { ...feedback, [tokenId]:`WOW, you own ${appconfig.tokens[tokenId].itemName}` }
         );
-        setClaimingNft(false);
+        setClaimingNft({ ...claimingNft, [tokenId]: false});
         dispatch(fetchData(blockchain.account, tokenId));
       });
   };
@@ -168,14 +172,17 @@ function App() {
             ai={"center"}
             style={{ backgroundColor: "#383838", padding: 24 }}
           >
-            <StyledImg src={images[i]} />
+              {t.isanim
+              ? <ReactPlayer loop playing url={images[i]} />
+            :<StyledImg src={images[i]} />}
+            
             <s.TextTitle
                     style={{ textAlign: "center", fontSize: 35, fontWeight: "bold" }}
                   >
                     {data.totalSupply[i]}/{t.totalSupply}
                   </s.TextTitle>
             <s.TextDescription style={{ textAlign: "center" }}>
-                  {feedback}
+                  {feedback[i]}
                 </s.TextDescription>
                 <s.SpacerSmall />
             {blockchain.account === "" ||
@@ -208,23 +215,26 @@ function App() {
                     ) : null}
                     
                   </s.Container>
-                ) : (
-                  <s.Container ai={"center"} jc={"center"} fd={"row"}>
-                    <StyledButton
-                      style={{backgroundColor: 'steelblue'}}
-                      disabled={claimingNft ? 1 : 0}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        claimNFTs(i, 1);
-                        getData(i);
-                      }}
-                    >
-                      {claimingNft ? "BUSY" : "BUY 1"}
-                    </StyledButton>
-                  </s.Container>
-                )}
+                ) : 
+                  claimingNft[i]
+                  ? <img src={logo} style={{width:30, height:30}}  alt="loading..." />
+                :<s.Container ai={"center"} jc={"center"} fd={"row"}>
+                <StyledButton
+                  style={{backgroundColor: 'steelblue'}}
+                  disabled={claimingNft[i] ? 1 : 0}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    claimNFTs(i, 1);
+                    getData(i);
+                  }}
+                >
+                  BUY
+                </StyledButton>
+              </s.Container>
+                  
+                }
                 <s.SpacerSmall />
-            {Number(data.totalSupply) == t.totalSupply ? (
+            {Number(data.totalSupply[i]) == t.totalSupply ? (
               <>
                 <s.TextTitle style={{ textAlign: "center" }}>
                   The sale has ended.

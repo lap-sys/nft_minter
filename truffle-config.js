@@ -66,6 +66,15 @@ module.exports = {
     // timeoutBlocks: 200,  // # of blocks before a deployment times out  (minimum/default: 50)
     // skipDryRun: true     // Skip dry run before migrations? (default: false for public nets )
     // },
+    polygonMumbai: {
+      provider: () => new HDWalletProvider(mnemonic, `https://polygon-mumbai.infura.io/v3/2eef29cc82094e999db1e9517b7ebcad`),
+      network_id: 80001,       
+      gas: 5500000,        
+      confirmations: 2,    // # of confs to wait between deployments. (default: 0)
+      timeoutBlocks: 200,  // # of blocks before a deployment times out  (minimum/default: 50)
+      skipDryRun: true  
+    },
+
     rinkeby: {
     provider: () => new HDWalletProvider(mnemonic, `https://rinkeby.infura.io/v3/2eef29cc82094e999db1e9517b7ebcad`),
     network_id: 4,       // Rinkeby's id

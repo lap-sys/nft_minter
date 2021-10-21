@@ -46,7 +46,7 @@ export const ResponsiveWrapper = styled.div`
   justify-content: stretched;
   align-items: stretched;
   max-width: 450px;
-  @media (min-width: 300px) {
+  @media (min-width: 200px) {
     flex-direction: column;
   }
 `;
@@ -101,7 +101,7 @@ function App() {
     setFeedback({ ...feedback, [tokenId]:`Minting ${appconfig.tokens[tokenId].collectionName} ...` });
     setClaimingNft({ ...claimingNft, [tokenId]: true});
     blockchain.smartContract[tokenId].methods
-      .mint(blockchain.account, _amount)
+      .mint(_amount)
       .send({
         gasLimit: "485000",
         to: appconfig.ownerAddress,
@@ -136,7 +136,7 @@ function App() {
   }, [blockchain.account]);
 
   return (
-    <div style={{'fontFamily': 'Ryomen'}}>
+    <div style={{'fontFamily': 'Arial'}}>
     <s.Screen style={{ backgroundImage: `url(${background})`, backgroundColor: "var(--black)" }}>
       <s.Container flex={1} ai={"center"} style={{ padding: 24 }}>
       <StyledImg src={projectTitle} />
@@ -173,7 +173,7 @@ function App() {
             style={{ backgroundColor: "#383838", padding: 24 }}
           >
               {t.isanim
-              ? <ReactPlayer loop playing url={images[i]} />
+              ? <ReactPlayer loop playing  url={images[i]} />
             :<StyledImg src={images[i]} />}
             
             <s.TextTitle

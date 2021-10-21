@@ -8,58 +8,120 @@
     how to create smart contracts on the blockchain.
     please review this code on your own before using any of
     the following code for production.
-    HashLips will not be liable in any way if for the use 
-    of the code. That being said, the code has been tested 
+    HashLips will not be liable in any way if for the use
+    of the code. That being said, the code has been tested
     to the best of the developers' knowledge to work as intended.
 */
-
 pragma solidity >=0.7.0 <0.9.0;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@chainlink/contracts/src/v0.8/VRFConsumerBase.sol";
 
-contract ARKS is ERC721Enumerable, Ownable {
+contract ARKS is ERC721Enumerable, Ownable, VRFConsumerBase {
   using Strings for uint256;
 
-  string public baseURI;
+  string baseURI;
   string public baseExtension = ".json";
-  uint256 public cost = 0.05 ether;
-  uint256 public maxSupply = 10000;
-  uint256 public maxMintAmount = 6;
-  bool public paused = false;
-  mapping(address => bool) public whitelisted;
 
+  // uint256 public cost = 169 ether;
+  // uint256 public maxSupply = 9963;
+  uint256 public cost = 1 ether;
+  uint256 public maxSupply = 36;
+
+  uint256 public maxMintAmount = 6;
+  uint256 public headStart = block.timestamp + 9 days;
+  bool public paused = false;
+
+ 
+  uint256 permillGiftMintONG = 13;
+  uint256 percGiftMint = 6;
+  uint256 percGiftEnd = 3;
+  uint256 nbEndReward = 3;
+  
+  address payable giftAddressONG = payable(0xe86b5d5562bF50415A7455163525184f490b965f);
+  mapping( bytes32 => uint256) public requestIdToSupply;
+  mapping( bytes32 => uint256) public requestIdToGiftValue;
+
+  bytes32 internal keyHash;
+  uint256 internal fee;
+  uint256 public randomResult = 1;
+
+
+  
   constructor(
     string memory _name,
     string memory _symbol,
     string memory _initBaseURI
-  ) ERC721(_name, _symbol) {
+  ) VRFConsumerBase(
+      0x8C7382F9D8f56b33781fE506E897a4F1e2d17255,
+      0x326C977E6efc84E512bB9C30f76E30c160eD06FB
+    )
+    ERC721(_name, _symbol) {
     setBaseURI(_initBaseURI);
-    mint(msg.sender, 6);
+    keyHash = 0x6e75b569a01ef56d18cab6a8e71e6600d6ce853834d4a5748b720d06f878b3a4;
+    fee = 0.0001 * 10 ** 18; // 0.0001 LINK (Varies by network)
   }
 
   // internal
+  function fulfillRandomness(bytes32 requestId, uint256 randomness) internal override {
+    address payable giftAddress = payable(msg.sender);
+    uint256 supply = requestIdToSupply[requestId];
+    uint256 giftValue = requestIdToGiftValue[requestId];
+    
+    randomResult = (randomness % supply) + 1;
+    giftAddress = payable(ownerOf(randomResult));
+    (bool success, ) = payable(giftAddress).call{value: giftValue}("");
+    require(success, "Could not send final value!");
+  }
+
   function _baseURI() internal view virtual override returns (string memory) {
     return baseURI;
   }
-
+ 
   // public
-  function mint(address _to, uint256 _mintAmount) public payable {
+
+  function mint(uint256 _mintAmount) public payable {
     uint256 supply = totalSupply();
-    require(!paused);
+    require(!paused, "Contract is paused!");
     require(_mintAmount > 0);
     require(_mintAmount <= maxMintAmount);
-    require(supply + _mintAmount <= maxSupply);
+    require(supply + _mintAmount <= maxSupply, "Max supply reached!");
+    require(msg.sender != owner(), "Owner can not mint!");
+    require(msg.value >= cost * _mintAmount, "Not enough funds!");
+   
+    
+    uint256 giftValue;
+    uint256 giftValueONG;
+   
+    for (uint256 i = 1; i <= _mintAmount; i++) {
+        _safeMint(msg.sender, supply + i);
+    }
+    
+    if (supply > 0) {
+        if (supply + _mintAmount == maxSupply) {
 
-    if (msg.sender != owner()) {
-        if(whitelisted[msg.sender] != true) {
-          require(msg.value >= cost * _mintAmount);
+            giftValue = address(this).balance * percGiftEnd / 100 / nbEndReward;
+            for (uint256 j = 1; j <= nbEndReward; j++ ) {
+                require(LINK.balanceOf(address(this)) >= fee, "Not enough LINK");
+                bytes32 requestId = requestRandomness(keyHash, fee);
+                requestIdToSupply[requestId] = totalSupply();
+                requestIdToGiftValue[requestId] = giftValue;
+            }
+        } else {
+    
+            giftValue = msg.value * percGiftMint / 100;
+            require(LINK.balanceOf(address(this)) >= fee, "Not enough LINK");
+            bytes32 requestId = requestRandomness(keyHash, fee);
+            requestIdToSupply[requestId] = totalSupply();
+            requestIdToGiftValue[requestId] = giftValue;
+            
+            giftValueONG = msg.value * permillGiftMintONG / 1000;
+            (bool successONG, ) = payable(giftAddressONG).call{value: giftValueONG}("");
+            require(successONG, "Could not send value to ONG!");
         }
     }
-
-    for (uint256 i = 1; i <= _mintAmount; i++) {
-      _safeMint(_to, supply + i);
-    }
+  
   }
 
   function walletOfOwner(address _owner)
@@ -74,33 +136,38 @@ contract ARKS is ERC721Enumerable, Ownable {
     }
     return tokenIds;
   }
+ 
+  // function randomNum(uint256 _mod, uint256 _seed, uint256 _salt) public view returns(uint256) {
+  //     uint256 num = uint256(keccak256(abi.encodePacked(block.timestamp, msg.sender, _seed, _salt))) % _mod;
+  //     return num;
+  // }
 
-  function tokenURI(uint256 tokenId)
-    public
-    view
-    virtual
-    override
-    returns (string memory)
-  {
-    require(
-      _exists(tokenId),
-      "ERC721Metadata: URI query for nonexistent token"
-    );
+  // function tokenURI(uint256 tokenId)
+  //   public
+  //   view
+  //   virtual
+  //   override
+  //   returns (string memory)
+  // {
+  //   require(
+  //     _exists(tokenId),
+  //     "ERC721Metadata: URI query for nonexistent token"
+  //   );
 
-    string memory currentBaseURI = _baseURI();
-    return bytes(currentBaseURI).length > 0
-        ? string(abi.encodePacked(currentBaseURI, tokenId.toString(), baseExtension))
-        : "";
-  }
+
+  //   string memory currentBaseURI = _baseURI();
+  //   return bytes(currentBaseURI).length > 0
+  //       ? string(abi.encodePacked(currentBaseURI, tokenId.toString(), baseExtension))
+  //       : "";
+  // }
 
   //only owner
+
+ 
   function setCost(uint256 _newCost) public onlyOwner() {
     cost = _newCost;
   }
 
-  function setmaxMintAmount(uint256 _newmaxMintAmount) public onlyOwner() {
-    maxMintAmount = _newmaxMintAmount;
-  }
 
   function setBaseURI(string memory _newBaseURI) public onlyOwner {
     baseURI = _newBaseURI;
@@ -114,16 +181,13 @@ contract ARKS is ERC721Enumerable, Ownable {
     paused = _state;
   }
  
- function whitelistUser(address _user) public onlyOwner {
-    whitelisted[_user] = true;
-  }
- 
-  function removeWhitelistUser(address _user) public onlyOwner {
-    whitelisted[_user] = false;
-  }
-
   function withdraw() public payable onlyOwner {
-    (bool success, ) = payable(msg.sender).call{value: address(this).balance}("");
-    require(success);
+    uint256 supply = totalSupply();
+    require(supply == maxSupply || block.timestamp >= headStart, "Can not withdraw yet.");
+    (bool s, ) = payable(msg.sender).call{value: address(this).balance}("");
+    require(s);
+    uint assetBalance = LINK.balanceOf(address(this));
+    (bool succ) = LINK.transfer(msg.sender, assetBalance);
+    require(succ);
   }
 }

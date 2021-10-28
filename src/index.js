@@ -1,6 +1,5 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import App from "./App";
 import Minter from './Minter'
 import reportWebVitals from "./reportWebVitals";
 import store from "./redux/store";

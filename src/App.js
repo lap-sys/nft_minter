@@ -1,7 +1,6 @@
 import React from "react";
 import { Routes, Route, Link } from "react-router-dom";
 import Minter from './Minter'
-import Team from './team/team.jsx'
 import { Navbar, Container, Nav} from 'react-bootstrap';
 
 function App() {

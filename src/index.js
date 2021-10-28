@@ -1,14 +1,16 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import App from "./App";
+import Minter from './Minter'
 import reportWebVitals from "./reportWebVitals";
 import store from "./redux/store";
 import { Provider } from "react-redux";
 import "./styles/reset.css";
 import "./styles/theme.css";
+
 ReactDOM.render(
   <Provider store={store}>
-    <App />
+      <Minter/>
   </Provider>,
   document.getElementById("root")
 );

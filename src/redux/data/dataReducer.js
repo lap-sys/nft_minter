@@ -3,6 +3,7 @@ const initialState = {
   name: {0:"", 1:"", 2:""},
   totalSupply: {0:0, 1:0, 2:0},
   cost: {0:0, 1:0, 2:0},
+  nbOwned: {0:0, 1:0, 2:0},
   error: false,
   errorMsg: "",
 };
@@ -23,6 +24,7 @@ const dataReducer = (state = initialState, action) => {
         name: { ...state.name, [action.payload.idx]: action.payload.name },
         totalSupply: { ...state.totalSupply, [action.payload.idx]: action.payload.totalSupply },
         cost: { ...state.cost, [action.payload.idx]: action.payload.cost },
+        nbOwned: { ...state.nbOwned, [action.payload.idx]: action.payload.nbOwned },
         error: false,
         errorMsg: "",
       };

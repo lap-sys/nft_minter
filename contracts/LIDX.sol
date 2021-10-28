@@ -18,7 +18,7 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@chainlink/contracts/src/v0.8/VRFConsumerBase.sol";
 
-contract LIDX is ERC721Enumerable, Ownable, VRFConsumerBase {
+contract LIDX369 is ERC721Enumerable, Ownable, VRFConsumerBase {
   using Strings for uint256;
 
   string baseURI;
@@ -42,6 +42,9 @@ contract LIDX is ERC721Enumerable, Ownable, VRFConsumerBase {
   address payable giftAddressONG = payable(0xe86b5d5562bF50415A7455163525184f490b965f);
   mapping( bytes32 => uint256) public requestIdToSupply;
   mapping( bytes32 => uint256) public requestIdToGiftValue;
+
+  mapping( address => uint256) public addressToCounter;
+  uint256 public maxTokenPerAddress = 6;
 
   bytes32 internal keyHash;
   uint256 internal fee;
@@ -89,7 +92,7 @@ contract LIDX is ERC721Enumerable, Ownable, VRFConsumerBase {
     require(supply + _mintAmount <= maxSupply, "Max supply reached!");
     require(msg.sender != owner(), "Owner can not mint!");
     require(msg.value >= cost * _mintAmount, "Not enough funds!");
-   
+    require(addressToCounter[msg.sender] + _mintAmount <= maxTokenPerAddress, "Token limit reached by this address");
     
     uint256 giftValue;
     uint256 giftValueONG;
@@ -142,24 +145,24 @@ contract LIDX is ERC721Enumerable, Ownable, VRFConsumerBase {
   //     return num;
   // }
 
-  // function tokenURI(uint256 tokenId)
-  //   public
-  //   view
-  //   virtual
-  //   override
-  //   returns (string memory)
-  // {
-  //   require(
-  //     _exists(tokenId),
-  //     "ERC721Metadata: URI query for nonexistent token"
-  //   );
+  function tokenURI(uint256 tokenId)
+    public
+    view
+    virtual
+    override
+    returns (string memory)
+  {
+    require(
+      _exists(tokenId),
+      "ERC721Metadata: URI query for nonexistent token"
+    );
 
 
-  //   string memory currentBaseURI = _baseURI();
-  //   return bytes(currentBaseURI).length > 0
-  //       ? string(abi.encodePacked(currentBaseURI, tokenId.toString(), baseExtension))
-  //       : "";
-  // }
+    string memory currentBaseURI = _baseURI();
+    return bytes(currentBaseURI).length > 0
+        ? string(abi.encodePacked(currentBaseURI, tokenId.toString(), baseExtension))
+        : "";
+  }
 
   //only owner
 

@@ -1,13 +1,13 @@
 // constants
 import Web3EthContract from "web3-eth-contract";
 import Web3 from "web3";
-import ARKS from "../../contracts/ARKS.json";
-import LIDX from "../../contracts/LIDX.json";
-import LMEMO from "../../contracts/LMEMO.json";
+import ARKS369 from "../../contracts/ARKS369.json";
+import LIDX369 from "../../contracts/LIDX369.json";
+import LMEMO369 from "../../contracts/LMEMO369.json";
 // log
 import { fetchData } from "../data/dataActions";
 import appconfig from "../../appconfig";
-const abis = [LIDX.abi, ARKS.abi, LMEMO.abi]
+const abis = [LIDX369.abi, ARKS369.abi, LMEMO369.abi]
 const connectRequest = (payload) => {
   return {
     type: "CONNECTION_REQUEST",

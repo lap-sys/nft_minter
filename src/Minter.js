@@ -13,9 +13,15 @@ import logo from './assets/images/load.gif'
 import projectTitle from "./assets/images/logoweb369.png"
 import appconfig from "./appconfig";
 import background from "./assets/images/fond.png";
-
-import "./assets/fonts/Ryomen.woff"
-import "./assets/fonts/PilatRegular.woff"
+import connectbutton from './assets/images/connectwalletbutton.png';
+import buynowbutton from './assets/images/buynowbutton.png';
+import opensea from './assets/images/openseabutton.png';
+import lostindextitle from './assets/images/TITRE lostindex.png';
+import lostmemoriestitle from './assets/images/TITRE lostmemories.png';
+import thearkonautstitle from './assets/images/TITRE thearkonauts.png';
+// import "./assets/fonts/Ryomen.woff"
+// import "./assets/fonts/PilatRegular.woff"
+import "@fontsource/chakra-petch";
 
 
 export const StyledButton = styled.button`
@@ -91,7 +97,7 @@ function Minter() {
   }
   const formStyle = {
     flex: 1,
-    flexDirection: 'column'
+    flexDirection: 'row'
   }
   const dispatch = useDispatch();
   const blockchain = useSelector((state) => state.blockchain);
@@ -102,6 +108,7 @@ function Minter() {
   const [ismuted, setIsmuted] = useState({0: true, 1:true, 2:true})
 
   const [images, setImages] = useState({0:i0, 1:i1, 2:i2})
+  const titleimagecollection = [thearkonautstitle, lostindextitle, lostmemoriestitle]
   const setImageUrl = () => {
     let idx = [0,1,2]
     let i = 0
@@ -201,7 +208,7 @@ function Minter() {
   }, [])
   console.log(ismuted)
   return (
-    <div style={{'fontFamily': 'Helvetica'}}>
+    <div style={{'fontFamily': 'Chakra Petch'}}>
     <s.Screen style={{ backgroundImage: `url(${background})`, backgroundColor: "var(--black)" }}>
       <s.Container flex={1} ai={"center"} style={{ padding: 24 }}>
       <StyledImg src={projectTitle} />
@@ -218,16 +225,8 @@ function Minter() {
         <ResponsiveWrapper2 style={{ padding: 10 }}>
             {appconfig.tokens.map((t, i) => {
               return (
-                <ResponsiveWrapper style={{ padding: 10 }}>
-                <s.Container flex={1}
-                    jc={"center"}
-                    ai={"center"}
-                    style={{ position: 'relative', backgroundColor: "#383838", padding: 10 }}>
-                     <s.TextDescription style={{ fontSize: "12px", textAlign: "center" }}>
-                  {blockchain.account === "" ||
-                blockchain.smartContract[i] === null ? "" : data.nbOwned[i] === t.maxBalance ? "Maximum minted tokens reached for this address" : data.nbOwned[i] + "/" + t.maxBalance + "\n minted by this address"}
-                </s.TextDescription>
-                </s.Container>
+                <ResponsiveWrapper style={{ padding: 10 , opacity: 0.8}}>
+                
                 
                 
                 <s.Container
@@ -262,19 +261,33 @@ function Minter() {
                         Previously minted items
                       </s.TextDescription> */}
                   <s.TextTitle style={{ opacity: 1,fontFamily: "ryomen", color: "WhiteSmoke", textAlign: "center", fontSize: 30, fontWeight: "bold" }} >
-                    {`${t.collectionName}`}
+                    {/* {`${t.collectionName}`} */}
+                    <StyledImg src={titleimagecollection[i]} />
                   </s.TextTitle>
 
                 <s.TextTitle style={{ paddingTop: "1px", paddingbottom: "1px",  textAlign: "center", fontSize: 35, fontWeight: "bold" }}>
                         {data.totalSupply[i]}/{t.totalSupply}
                   </s.TextTitle>
-                  <s.TextDescription style={{ paddingBottom: "10px", fontWeight: "bold", textAlign: "center" }}>
-                      {feedback[i] || `${t.giftStep - data.totalSupply[i] % t.giftStep} to next reward`}
+                  <s.TextDescription style={{ paddingBottom: "12px", fontWeight: "bold", textAlign: "center" }}>
+                      {/* {feedback[i] || `${t.giftStep - data.totalSupply[i] % t.giftStep} to next reward`} */}
+                      total minted items
+                  </s.TextDescription>
+                  <s.TextTitle style={{ paddingTop: "1px", paddingbottom: "1px",  textAlign: "center", fontSize: 35, fontWeight: "bold" }}>
+                  
+                  {data.nbOwned[i] === t.maxBalance ? "Maximum minted tokens reached for this address" : data.nbOwned[i] + "/" + t.maxBalance}
+       
+                  </s.TextTitle>
+                  
+                  <s.TextDescription style={{ paddingBottom: "12px", fontWeight: "bold", textAlign: "center" }}>
+                      {/* {feedback[i] || `${t.giftStep - data.totalSupply[i] % t.giftStep} to next reward`} */}
+                      mint limit per address
                   </s.TextDescription>
                 <s.SpacerSmall />
+                <hr/>
                 <div style={formStyle} >
+                  <div>
                 <label>
-                <span>{`Amount (max: ${t.maxMint}):`}</span>
+                
                 <input type="text" style={{width: 30, textAlign:'center'}} pattern="[0-9]*" value={amount[i]} onKeyPress={(event) => {
                         if (!/[0-9]/.test(event.key) || !(amount[i] <= t.maxMint)) {
                           event.preventDefault();
@@ -282,26 +295,44 @@ function Minter() {
                       }} onChange={(event)=>handleChange(i, event)} default={amount[i]}/>
                 </label>
                 </div>
+                <div>
+                <s.TextTitle style={{ color: '#fff',textAlign: "center", fontSize:'12px' }}>
+                  {`${amount[i] * t.mintCost } ${appconfig.mintCostCurrency}`}
+                </s.TextTitle>
+                <s.SpacerXSmall />
+                <s.TextDescription style={{  fontSize: "12px", textAlign: "center" }}>
+                  Excluding gas fee.
+                </s.TextDescription>
+                </div>
+                </div>
                 <s.SpacerSmall />
             {blockchain.account === "" ||
                 blockchain.smartContract[i] === null ? (
                   <s.Container ai={"center"} jc={"center"}>
-                    <s.TextDescription style={{ padding: "1px", textAlign: "center" }}>
-                      {`Connect to ${appconfig.network}`}
-                    </s.TextDescription>
+                    
                     <s.SpacerSmall />
                     <StyledButton
-                    style={{ border: "4px", fontFamily: "Helvetica", border:"white", backgroundColor: 'red'}}
+                    style={{ backgroundImage: `url(${connectbutton})`,
+                    backgroundPosition: 'center',
+                    backgroundSize: 'cover',
+                      backgroundRepeat: 'no-repeat',
+                      width:150,
+                    height:30,
+                    textAlign:'center', border: "4px"}}
                       onClick={(e) => {
                         e.preventDefault();
                         dispatch(connect(i));
                         getData(i);
                       }}
                     >
-                      WALLET CONNECT
+                      {/* <s.Container ai={"center"} jc={"center"}>
+                      <StyledImg src={connectbutton} />
+                      </s.Container > */}
                     </StyledButton>
                     <s.SpacerSmall />
-                
+                    <s.TextDescription style={{ padding: "1px", textAlign: "center" }}>
+                      {`Connect to ${appconfig.network}`}
+                    </s.TextDescription>
                     {blockchain.errorMsg !== "" ? (
                       <>
                         <s.SpacerSmall />
@@ -318,7 +349,14 @@ function Minter() {
                   ? <img src={logo} style={{width:30, height:30}}  alt="loading..." />
                 :<s.Container ai={"center"} jc={"center"} fd={"row"}>
                 <StyledButton
-                  style={{backgroundColor: 'darkturquoise'}}
+                style={{ backgroundImage: `url(${buynowbutton})`,
+                  backgroundPosition: 'center',
+                  backgroundSize: 'cover',
+                    backgroundRepeat: 'no-repeat',
+                    width:150,
+                    height:30,
+                    color: '#fff',
+                  textAlign:'center', border: "4px"}}
                   disabled={claimingNft[i] ? 1 : 0}
                   onClick={(e) => {
                     e.preventDefault();
@@ -326,8 +364,11 @@ function Minter() {
                     getData(i);
                   }}
                 >
-                  BUY
+                  {/* <s.Container ai={"center"} jc={"center"}>
+                  <StyledImg src={buynowbutton} />
+                  </s.Container> */}
                 </StyledButton>
+                
               </s.Container>
                   
                 }
@@ -344,22 +385,17 @@ function Minter() {
                     target={"_blank"}
                     href={"https://testnets.opensea.io/collection/369-arkives"}
                   >
-                    Opensea.io
+                    <StyledImg src={opensea} />
                   </a>
                 </s.TextDescription>
               </>
             ) : (
               <>
               
-                <s.TextTitle style={{ textAlign: "center", fontSize:'12px' }}>
-                  {` costs: ${amount[i] * t.mintCost } ${appconfig.mintCostCurrency}`}
-                </s.TextTitle>
-                <s.SpacerXSmall />
-                <s.TextDescription style={{ fontSize: "12px", textAlign: "center" }}>
-                  Excluding gas fee.
-                </s.TextDescription>
+                
                 <s.SpacerMedium />
-                   <a target={"_blank"} style={{textDecoration: "none", fontFamily: "Helvetica", fontSize: "18px", color: 'cornflowerblue'}}  href={`${t.collectionURL}`}>OPENSEA.IO</a>
+                   <a target={"_blank"} style={{textDecoration: "none", fontFamily: "Helvetica", fontSize: "18px", color: 'cornflowerblue'}}  href={`${t.collectionURL}`}> 
+                   <StyledImg src={opensea} /></a>
                 <s.SpacerMedium />
                 
               </>

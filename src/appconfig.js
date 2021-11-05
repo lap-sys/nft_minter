@@ -51,7 +51,7 @@ module.exports = {
             collectionName: "Lost Memories",
             image: 'i2',
             extension: 'mp4',
-            CID: 'QmRFw68ir6UcQn8dJ6zjDgxqXSW2VvjnYwFYxiA3Pzc8Sr',
+            CID: 'QmStzPQS7bah48J4hej889SnaKkFUf9ujUepWtwhfCrCpy',
             isanim: true,
             idx: 2,
             collectionURL: "https://testnets.opensea.io/collection/lost-memories",

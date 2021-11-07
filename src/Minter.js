@@ -225,7 +225,7 @@ function Minter() {
         <ResponsiveWrapper2 style={{ padding: 10 }}>
             {appconfig.tokens.map((t, i) => {
               return (
-                <ResponsiveWrapper style={{ padding: 10 , opacity: 0.8}}>
+                <ResponsiveWrapper style={{ padding: 10}}>
                 
                 
                 
@@ -233,7 +233,7 @@ function Minter() {
                     flex={1}
                     jc={"end"}
                     ai={"center"}
-                    style={{ backgroundColor: "#383838", padding: 10}}>
+                    style={{ backgroundColor: "rgba(56,56,56, 0.7)", padding: 10}}>
               {t.isanim
                ? <ReactPlayer  loop playing muted={ismuted[i]}  url={images[i]} />
                :<StyledImg src={images[i]} />}
@@ -255,7 +255,7 @@ function Minter() {
                     flex={1}
                     jc={"center"}
                     ai={"center"}
-                    style={{  position: 'relative',backgroundColor: "#383838", padding: 10 }}>
+                    style={{  position: 'relative',backgroundColor: "rgba(56,56,56, 0.7", padding: 10 }}>
                   <s.SpacerMedium />
                   {/* <s.TextDescription style={{ fontSize: "14px", textAlign: "center" }}>
                         Previously minted items
@@ -355,7 +355,6 @@ function Minter() {
                     backgroundRepeat: 'no-repeat',
                     width:150,
                     height:30,
-                    color: '#fff',
                   textAlign:'center', border: "4px"}}
                   disabled={claimingNft[i] ? 1 : 0}
                   onClick={(e) => {

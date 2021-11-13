@@ -96,8 +96,20 @@ function Minter() {
     overflow: 'hidden'
   }
   const formStyle = {
-    flex: 1,
-    flexDirection: 'row'
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems:'center',
+    justifyContent: 'center'
+  }
+  const formStyle2 = {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems:'flex-start',
+    justifyContent: 'center'
+  }
+  const counterStyle = {
+    width: 16,
+    fontSize: 18
   }
   const dispatch = useDispatch();
   const blockchain = useSelector((state) => state.blockchain);
@@ -107,40 +119,33 @@ function Minter() {
   const [amount, setAmount] = useState({0: 1, 1:1, 2:1})
   const [ismuted, setIsmuted] = useState({0: true, 1:true, 2:true})
 
-  const [images, setImages] = useState({0:i0, 1:i1, 2:i2})
+  const [images, setImages] = useState({0:null, 1:null, 2:null})
+  const initImages = [i1, i0, i2]
   const titleimagecollection = [thearkonautstitle, lostindextitle, lostmemoriestitle]
   const setImageUrl = () => {
-    let idx = [0,1,2]
-    let i = 0
-    let t = appconfig.tokens[i]
-    
-      let N = data.totalSupply[i]
+    // let idx = [0,1,2]
+    // let i = 0
+    // let t = appconfig.tokens[i]
+    const resimages = {}
+    for (let k = 0; k<=2; k++) {
+      let N = data.totalSupply[k]
       let n = Math.floor(N * Math.random() + 1)
-      let url = `https://gateway.pinata.cloud/ipfs/${t.CID}/${n.toString()}.${t.extension}`
-      setImages({...images, [i]: url })
+      let url = `https://gateway.pinata.cloud/ipfs/${appconfig.tokens[k].CID}/${n.toString()}.${appconfig.tokens[k].extension}`
+      resimages[k] = N ? url : null
+    }
+      
+    setImages(resimages)
 
   }
-  const setVideoUrl = () => {
-    let idx = [0,1,2]
-    let i = 2
-    let t = appconfig.tokens[i]
-    
-      let N = data.totalSupply[i]
-      let n = Math.floor(N * Math.random() + 1)
-      let url = `https://gateway.pinata.cloud/ipfs/${t.CID}/${n.toString()}.${t.extension}`
-      setImages({...images, [i]: url })
-
+  const incrementAmount = (e, i) => {
+    const v = Math.min(amount[i] + 1, appconfig.tokens[i].maxMint)
+    const res = { ...amount, [i]: v }
+    setAmount(res)
   }
-  const setAnimUrl = () => {
-    let idx = [0,1,2]
-    let i = 1
-    let t = appconfig.tokens[i]
-    
-      let N = data.totalSupply[i]
-      let n = Math.floor(N * Math.random() + 1)
-      let url = `https://gateway.pinata.cloud/ipfs/${t.CID}/${n.toString()}.${t.extension}`
-      setImages({...images, [i]: url })
-
+  const decrementAmount = (e,i) => {
+    const v = Math.max(amount[i] - 1, 1)
+    const res = { ...amount, [i]: v }
+    setAmount(res)
   }
   const switchMuted = (i) => {
     const currentmutestate = ismuted[i]
@@ -161,6 +166,7 @@ function Minter() {
     if (_amount <= 0) {
       return;
     }
+    console.log(_amount)
     console.log("claiming NFT")
     setFeedback({ ...feedback, [tokenId]:`Minting ${appconfig.tokens[tokenId].collectionName} ...` });
     setClaimingNft({ ...claimingNft, [tokenId]: true});
@@ -183,16 +189,23 @@ function Minter() {
         );
         setClaimingNft({ ...claimingNft, [tokenId]: false});
         dispatch(fetchData(blockchain.account, tokenId));
+        setImageUrl()
+        // setAnimUrl()
+        // setVideoUrl()
       });
   };
   
   const getData = (idx) => {
     if (blockchain.account !== "" && blockchain.smartContract[idx] !== null) {
       dispatch(fetchData(blockchain.account, idx));
+      setImageUrl()
+      // setAnimUrl()
+      // setVideoUrl()
     }
   };
 
   useEffect(() => {
+    setImageUrl()
     appconfig.tokens.map((t, i)=> {
       getData(i)
     })
@@ -200,18 +213,22 @@ function Minter() {
     ;
   }, [blockchain.account]);
   useEffect(async () => {
-
-    setInterval(setImageUrl, 10000)
+    setImageUrl()
+    // setInterval(setImageUrl, 10000)
     // setInterval(setVideoUrl, 30000)
     // setInterval(setAnimUrl, 5000)
    
   }, [])
-  console.log(ismuted)
+  console.log(images)
   return (
     <div style={{'fontFamily': 'Chakra Petch'}}>
     <s.Screen style={{ backgroundImage: `url(${background})`, backgroundColor: "var(--black)" }}>
       <s.Container flex={1} ai={"center"} style={{ padding: 24 }}>
-      <StyledImg src={projectTitle} />
+      <a 
+                    href={"http://369arkivesofficial.com/"}
+                  >
+        <StyledImg src={projectTitle} />
+      </a>
         {/* <s.StyledText
           style={{ textAlign: "center", fontSize: 32, fontWeight: "bold" }}
         >
@@ -233,10 +250,11 @@ function Minter() {
                     flex={1}
                     jc={"end"}
                     ai={"center"}
-                    style={{ backgroundColor: "rgba(56,56,56, 0.7)", padding: 10}}>
+                    style={{ backgroundColor: "rgba(56,56,56, 0.7)", padding: 10}}
+                    onClick={setImageUrl} >
               {t.isanim
-               ? <ReactPlayer  loop playing muted={ismuted[i]}  url={images[i]} />
-               :<StyledImg src={images[i]} />}
+               ? <ReactPlayer  loop playing muted={ismuted[i]}  url={images[i] || initImages[i]} />
+               :<StyledImg src={images[i] || initImages[i]} />}
                {t.control
                ? 
                   <div style={{margin:3, justifyContent:'flex-end'}}>
@@ -266,7 +284,7 @@ function Minter() {
                   </s.TextTitle>
 
                 <s.TextTitle style={{ paddingTop: "1px", paddingbottom: "1px",  textAlign: "center", fontSize: 35, fontWeight: "bold" }}>
-                        {data.totalSupply[i]}/{t.totalSupply}
+                      <div style={{display: 'flex', flexDirection: 'row'}} ><div style={{color: 'red'}} >{data.totalSupply[i]}</div>/<div></div>{t.totalSupply}</div> 
                   </s.TextTitle>
                   <s.TextDescription style={{ paddingBottom: "12px", fontWeight: "bold", textAlign: "center" }}>
                       {/* {feedback[i] || `${t.giftStep - data.totalSupply[i] % t.giftStep} to next reward`} */}
@@ -274,7 +292,7 @@ function Minter() {
                   </s.TextDescription>
                   <s.TextTitle style={{ paddingTop: "1px", paddingbottom: "1px",  textAlign: "center", fontSize: 35, fontWeight: "bold" }}>
                   
-                  {data.nbOwned[i] === t.maxBalance ? "Maximum minted tokens reached for this address" : data.nbOwned[i] + "/" + t.maxBalance}
+                  <div style={{display: 'flex', flexDirection: 'row'}} ><div style={{color: 'red'}} >{data.nbOwned[i] === t.maxBalance ? "Maximum minted tokens reached for this address" : data.nbOwned[i]}</div><div>{"/" + t.maxBalance}</div></div> 
        
                   </s.TextTitle>
                   
@@ -283,46 +301,54 @@ function Minter() {
                       mint limit per address
                   </s.TextDescription>
                 <s.SpacerSmall />
-                <hr/>
+                <hr style={{width: '61.8%',
+                      }} />
+                      <s.SpacerSmall />
+                <div style={{display: 'flex',justifyContent: 'center', flexDirection: 'column'}} >
                 <div style={formStyle} >
-                  <div>
-                <label>
-                
-                <input type="text" style={{width: 30, textAlign:'center'}} pattern="[0-9]*" value={amount[i]} onKeyPress={(event) => {
-                        if (!/[0-9]/.test(event.key) || !(amount[i] <= t.maxMint)) {
-                          event.preventDefault();
-                        }
-                      }} onChange={(event)=>handleChange(i, event)} default={amount[i]}/>
-                </label>
-                </div>
-                <div>
-                <s.TextTitle style={{ color: '#fff',textAlign: "center", fontSize:'12px' }}>
-                  {`${amount[i] * t.mintCost } ${appconfig.mintCostCurrency}`}
-                </s.TextTitle>
-                <s.SpacerXSmall />
-                <s.TextDescription style={{  fontSize: "12px", textAlign: "center" }}>
-                  Excluding gas fee.
-                </s.TextDescription>
-                </div>
+                  <div style={formStyle}>
+                    
+                    
+                    <button style={counterStyle} onClick={(e) => decrementAmount(e,i)}>-</button>
+                    <button style={counterStyle} onClick={(e) => incrementAmount(e,i)}>+</button>
+                    <s.SpacerSmall />
+                    <label style={{color: "white", fontSize: '22px', fontWeight: 'bold', alignItems: 'center'}} >
+                    {amount[i]}
+                    {/* <input type="text" style={{width: 30, textAlign:'center'}} pattern="[0-9]*" value={amount[i]} onKeyPress={(event) => {
+                            if (!/[0-9]/.test(event.key) || !(amount[i] <= t.maxMint)) {
+                              event.preventDefault();
+                            }
+                          }} onChange={(event)=>handleChange(i, event)} default={amount[i]}/> */}
+                    </label>
+                  </div>
+                  <s.SpacerSmall />
+                  <div style={formStyle2} >
+                    <s.TextTitle style={{ color: '#fff',textAlign: "center", fontSize:'15px', fontWeight: 'bold' }}>
+                      {`${Math.round(amount[i] * t.mintCost*10000)/10000 } ${appconfig.mintCostCurrency}`}
+                    </s.TextTitle>
+                    <s.TextDescription style={{  fontSize: "12px", textAlign: "center" }}>
+                      Excluding gas fee.
+                    </s.TextDescription>
+                  </div>
                 </div>
                 <s.SpacerSmall />
             {blockchain.account === "" ||
                 blockchain.smartContract[i] === null ? (
                   <s.Container ai={"center"} jc={"center"}>
                     
-                    <s.SpacerSmall />
                     <StyledButton
                     style={{ backgroundImage: `url(${connectbutton})`,
                     backgroundPosition: 'center',
                     backgroundSize: 'cover',
                       backgroundRepeat: 'no-repeat',
-                      width:150,
+                      width:'100%',
                     height:30,
                     textAlign:'center', border: "4px"}}
                       onClick={(e) => {
                         e.preventDefault();
                         dispatch(connect(i));
                         getData(i);
+                        setImageUrl();
                       }}
                     >
                       {/* <s.Container ai={"center"} jc={"center"}>
@@ -359,7 +385,7 @@ function Minter() {
                   disabled={claimingNft[i] ? 1 : 0}
                   onClick={(e) => {
                     e.preventDefault();
-                    claimNFTs(i, 1);
+                    claimNFTs(i, amount[i]);
                     getData(i);
                   }}
                 >
@@ -371,6 +397,7 @@ function Minter() {
               </s.Container>
                   
                 }
+                </div>
                 <s.SpacerXSmall />
             {Number(data.totalSupply[i]) == t.totalSupply ? (
               <>

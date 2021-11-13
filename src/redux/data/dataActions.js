@@ -53,8 +53,8 @@ export const fetchData = (account, idx) => {
           idx
         })
       );
-      console.log(await store.getState().blockchain)
-      console.log(await store.getState().data)
+      // console.log(await store.getState().blockchain)
+      // console.log(await store.getState().data)
     } catch (err) {
       console.log(err);
       dispatch(fetchDataFailed("Could not load data from contract."));

@@ -48,16 +48,15 @@ export const StyledButton = styled.button`
 export const ResponsiveWrapper = styled.div`
   flex: 1;
   object-fit: 'cover';
-  overflow: 'hidden';
-  height: 100%;
   flex-direction: column;
   text-align: center;
   justify-content: stretched;
-  align-items: stretched;
+  align-items: 100%;
   max-width: 430px;
   @media (min-width: 200px) {
     flex-direction: column;
   }
+  
 `;
 
 export const ResponsiveWrapper2 = styled.div`
@@ -69,8 +68,9 @@ export const ResponsiveWrapper2 = styled.div`
   text-align: center;
   display:flex;
   opacity: 0.;
+  height:100%;
   justify-content: stretched;
-  align-items: stretched;
+  align-items: stretch;
   @media (min-width: 100%) {
     flex-direction: column;
   }
@@ -253,11 +253,11 @@ function Minter() {
                     style={{ backgroundColor: "rgba(56,56,56, 0.7)", padding: 10}}
                     onClick={setImageUrl} >
               {t.isanim
-               ? <ReactPlayer  loop playing muted={ismuted[i]}  url={images[i] || initImages[i]} />
-               :<StyledImg src={images[i] || initImages[i]} />}
+               ? <s.Container ><ReactPlayer  loop playing muted={ismuted[i]}  url={images[i] || initImages[i]} /></s.Container>
+               :<s.Container><StyledImg src={images[i] || initImages[i]} /></s.Container>}
                {t.control
                ? 
-                  <div style={{margin:3, justifyContent:'flex-end'}}>
+                  <div style={{margin:1, justifyContent:'flex-start'}}>
                    {ismuted[i]
                    ? <Button style={{backgroundColor: "#383838"}} onClick={()=> switchMuted(i)}>
                        {'►'}
@@ -268,12 +268,7 @@ function Minter() {
                  </div>
              
               : null}
-               </s.Container>
-               <s.Container
-                    flex={1}
-                    jc={"center"}
-                    ai={"center"}
-                    style={{  position: 'relative',backgroundColor: "rgba(56,56,56, 0.7", padding: 10 }}>
+              
                   <s.SpacerMedium />
                   {/* <s.TextDescription style={{ fontSize: "14px", textAlign: "center" }}>
                         Previously minted items
@@ -301,10 +296,12 @@ function Minter() {
                       mint limit per address
                   </s.TextDescription>
                 <s.SpacerSmall />
-                <hr style={{width: '61.8%',
-                      }} />
+                
                       <s.SpacerSmall />
                 <div style={{display: 'flex',justifyContent: 'center', flexDirection: 'column'}} >
+                <hr style={{width: '100%',
+                      }} />
+                      <s.SpacerSmall />
                 <div style={formStyle} >
                   <div style={formStyle}>
                     
